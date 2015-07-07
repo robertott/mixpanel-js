@@ -4555,38 +4555,41 @@ function bootstrap_sdk(bootstrap_options) {
         mixpanel["_"] = _;
     };
 
+    var update_init_func = function update_init_func() {
+        // we override the snippets init function to handle the case where a
+        // user initializes the mixpanel library after the script loads & runs
+        mixpanel["init"] = function (token, config, name) {
+            if (name) {
+                // initialize a sub library
+                if (!mixpanel[name]) {
+                    mixpanel[name] = instances[name] = create_mplib(token, config, name);
+                    mixpanel[name]._loaded();
+                }
+            } else {
+                var instance = mixpanel;
+
+                if (instances[PRIMARY_INSTANCE_NAME]) {
+                    // main mixpanel lib already initialized
+                    instance = instances[PRIMARY_INSTANCE_NAME];
+                } else if (token) {
+                    // intialize the main mixpanel lib
+                    instance = create_mplib(token, config, PRIMARY_INSTANCE_NAME);
+                    instance._loaded();
+                    instances[PRIMARY_INSTANCE_NAME] = instance;
+                }
+
+                global_context[PRIMARY_INSTANCE_NAME] = mixpanel = instance;
+                extend_mp();
+            }
+        };
+    };
+
     var global_init = {
         "module": function module() {
-            // we override the snippets init function to handle the case where a
-            // user initializes the mixpanel library after the script loads & runs
-            mixpanel["init"] = function (token, config, name) {
-                if (name) {
-                    // initialize a sub library
-                    if (!mixpanel[name]) {
-                        mixpanel[name] = instances[name] = create_mplib(token, config, name);
-                        mixpanel[name]._loaded();
-                    }
-                } else {
-                    var instance = mixpanel;
-
-                    if (instances[PRIMARY_INSTANCE_NAME]) {
-                        // main mixpanel lib already initialized
-                        instance = instances[PRIMARY_INSTANCE_NAME];
-                    } else if (token) {
-                        // intialize the main mixpanel lib
-                        instance = create_mplib(token, config, PRIMARY_INSTANCE_NAME);
-                        instance._loaded();
-                        instances[PRIMARY_INSTANCE_NAME] = instance;
-                    }
-
-                    global_context[PRIMARY_INSTANCE_NAME] = mixpanel = instance;
-                    extend_mp();
-                }
-            };
+            update_init_func();
             mixpanel["init"]();
-            var init = mixpanel["init"];
             global_context[PRIMARY_INSTANCE_NAME] = mixpanel = new MixpanelLib();
-            mixpanel["init"] = init;
+            update_init_func();
             add_dom_loaded_handler();
         },
         "snippet": function snippet() {
@@ -4618,32 +4621,7 @@ function bootstrap_sdk(bootstrap_options) {
                 }
             });
 
-            // we override the snippets init function to handle the case where a
-            // user initializes the mixpanel library after the script loads & runs
-            mixpanel["init"] = function (token, config, name) {
-                if (name) {
-                    // initialize a sub library
-                    if (!mixpanel[name]) {
-                        mixpanel[name] = instances[name] = create_mplib(token, config, name);
-                        mixpanel[name]._loaded();
-                    }
-                } else {
-                    var instance = mixpanel;
-
-                    if (instances[PRIMARY_INSTANCE_NAME]) {
-                        // main mixpanel lib already initialized
-                        instance = instances[PRIMARY_INSTANCE_NAME];
-                    } else if (token) {
-                        // intialize the main mixpanel lib
-                        instance = create_mplib(token, config, PRIMARY_INSTANCE_NAME);
-                        instance._loaded();
-                    }
-
-                    global_context[PRIMARY_INSTANCE_NAME] = mixpanel = instance;
-                    extend_mp();
-                }
-            };
-
+            update_init_func();
             mixpanel["init"]();
 
             // Fire loaded events after updating the window's mixpanel object
