@@ -1,5 +1,7 @@
 #!/bin/bash
 
+./node_modules/.bin/browserify src/loader.globals.js -t [ babelify --compact false ] --outfile build/mixpanel.globals.js
+
 if [ -z "$1" ]; then
     echo "Please supply a path to the Google Closure Compiler .jar"
     exit 1
