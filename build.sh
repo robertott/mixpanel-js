@@ -2,6 +2,7 @@
 
 ./node_modules/.bin/esperanto -i src/loader.module.js -t amd -b -o build/mixpanel.amd.js
 ./node_modules/.bin/esperanto -i src/loader.module.js -t cjs -b -o build/mixpanel.cjs.js
+./node_modules/.bin/esperanto -i src/loader.module.js -t umd -b -n mixpanel -o build/mixpanel.umd.js
 ./node_modules/.bin/browserify src/loader.globals.js -t [ babelify --compact false ] --outfile build/mixpanel.globals.js
 
 if [ -z "$1" ]; then
