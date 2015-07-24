@@ -8,7 +8,8 @@
   },
   "scripts": {
     "test": "echo 'Browse to localhost:3000/tests'",
-    "start": "node testServer.js"
+    "start": "node testServer.js",
+    "build-js": "./build.sh node_modules/google-closure-compiler/compiler.jar"
   },
   "repository": {
     "type": "git",
@@ -23,6 +24,7 @@
   "devDependencies": {
     "cookie-parser": "^1.3.4",
     "express": "^4.12.2",
+    "google-closure-compiler": "^20150609.0.0",
     "morgan": "^1.5.2"
   }
 }
